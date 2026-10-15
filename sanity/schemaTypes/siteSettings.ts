@@ -1,0 +1,38 @@
+import {defineField, defineType} from 'sanity'
+
+export const siteSettings = defineType({
+  name: 'siteSettings',
+  title: 'Site settings',
+  type: 'document',
+  groups: [
+    {name: 'identity', title: 'Identity', default: true},
+    {name: 'hero', title: 'Hero'},
+    {name: 'contact', title: 'Contact'},
+    {name: 'seo', title: 'SEO'},
+  ],
+  fields: [
+    defineField({name: 'brandName', title: 'Name', type: 'string', group: 'identity', validation: (rule) => rule.required()}),
+    defineField({name: 'brandTag', title: 'Tag', type: 'string', group: 'identity', initialValue: 'DOP'}),
+    defineField({name: 'aboutLabel', title: 'About navigation label', type: 'string', group: 'identity', initialValue: 'ABOUT'}),
+    defineField({name: 'emailLabel', title: 'Email footer label', type: 'string', group: 'identity', initialValue: 'E-MAIL'}),
+    defineField({name: 'instagramLabel', title: 'Instagram footer label', type: 'string', group: 'identity', initialValue: 'INSTAGRAM'}),
+    defineField({name: 'btsLabel', title: 'Behind-the-scenes label', type: 'string', group: 'identity', initialValue: 'Behind the scenes'}),
+    defineField({name: 'viewFilmLabel', title: 'View film label', type: 'string', group: 'identity', initialValue: 'View film'}),
+    defineField({name: 'viewImageLabel', title: 'View image label', type: 'string', group: 'identity', initialValue: 'View image'}),
+    defineField({name: 'heroPoster', title: 'Hero poster', type: 'image', group: 'hero', options: {hotspot: true}}),
+    defineField({name: 'heroDesktopVideo', title: 'Hero video — desktop', type: 'file', group: 'hero', options: {accept: 'video/mp4'}}),
+    defineField({name: 'heroMobileVideo', title: 'Hero video — mobile', type: 'file', group: 'hero', options: {accept: 'video/mp4'}}),
+    defineField({name: 'heroAriaLabel', title: 'Hero accessibility label', type: 'string', group: 'hero', initialValue: 'Demoreel'}),
+    defineField({name: 'contactEyebrow', title: 'Contact eyebrow', type: 'string', group: 'contact', initialValue: 'ABOUT / CONTACT'}),
+    defineField({name: 'contactRole', title: 'Role', type: 'string', group: 'contact', initialValue: 'VIDEOGRAPHER · DOP'}),
+    defineField({name: 'contactName', title: 'Contact name', type: 'string', group: 'contact'}),
+    defineField({name: 'contactEmail', title: 'Email', type: 'string', group: 'contact', validation: (rule) => rule.email()}),
+    defineField({name: 'instagramHandle', title: 'Instagram handle', type: 'string', group: 'contact'}),
+    defineField({name: 'instagramUrl', title: 'Instagram URL', type: 'url', group: 'contact'}),
+    defineField({name: 'copyright', title: 'Copyright line', type: 'string', group: 'contact'}),
+    defineField({name: 'availability', title: 'Availability line', type: 'string', group: 'contact'}),
+    defineField({name: 'seoTitle', title: 'SEO title', type: 'string', group: 'seo', validation: (rule) => rule.max(65)}),
+    defineField({name: 'seoDescription', title: 'SEO description', type: 'text', rows: 3, group: 'seo', validation: (rule) => rule.max(170)}),
+  ],
+  preview: {prepare: () => ({title: 'Site settings'})},
+})
