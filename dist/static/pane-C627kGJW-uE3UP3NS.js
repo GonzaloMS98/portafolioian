@@ -1,1 +1,0 @@
-export{r as default}from"./sanity-BQ2QfMyB.js";

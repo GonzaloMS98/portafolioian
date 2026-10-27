@@ -94,7 +94,7 @@ export default function Page() {
         </section>
 
         <section className={`view-panel ${view === 'home' ? 'is-visible' : ''}`} aria-hidden={view !== 'home'}>
-          <div className="hero"><div className="hero-media"><img className="hero-poster" src={content.hero.poster} alt="" /><video ref={heroVideoRef} className={heroPlaybackFailed ? 'playback-failed' : ''} src={view === 'home' ? heroVideoSrc ?? undefined : undefined} autoPlay muted loop playsInline preload="metadata" poster={content.hero.poster} aria-label={content.hero.ariaLabel} onError={() => setHeroPlaybackFailed(true)} /><div className="media-wash" /><div className="media-grain" /></div></div>
+          <div className="hero"><div className="hero-media"><video ref={heroVideoRef} className={heroPlaybackFailed ? 'playback-failed' : ''} src={view === 'home' ? heroVideoSrc ?? undefined : undefined} autoPlay muted loop playsInline preload="metadata" poster={content.hero.poster} aria-label={content.hero.ariaLabel} onError={() => setHeroPlaybackFailed(true)} /><div className="media-wash" /><div className="media-grain" /></div></div>
         </section>
 
         {workViews.map((section) => {
