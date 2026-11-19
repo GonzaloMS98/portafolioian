@@ -4,6 +4,7 @@ import {useEffect, useMemo, useRef, useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/navigation'
 import {slugPath, type ProjectContent, type WorkSectionContent} from '@/lib/content'
+import {imageSrcSet, imageUrl, WIDE_WIDTHS} from '@/lib/image'
 
 export type SectionVideo = {
   key: string
@@ -42,29 +43,41 @@ function AutoVideo({src, poster, active, defaultRatio, label, className, onOpen,
   const videoRef = useRef<HTMLVideoElement>(null)
   const [ratio, setRatio] = useState(defaultRatio)
   const [inView, setInView] = useState(false)
+  const [near, setNear] = useState(false)
+  // Only start downloading once the section is open and the video is close to the screen; never unload afterwards.
+  const [armed, setArmed] = useState(false)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting && entry.intersectionRatio >= 0.5), {threshold: [0, 0.5, 1]})
-    observer.observe(video)
-    return () => observer.disconnect()
+    const playObserver = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting && entry.intersectionRatio >= 0.5), {threshold: [0, 0.5, 1]})
+    const nearObserver = new IntersectionObserver(([entry]) => setNear(entry.isIntersecting), {rootMargin: '60% 0px 60% 0px'})
+    playObserver.observe(video)
+    nearObserver.observe(video)
+    return () => {
+      playObserver.disconnect()
+      nearObserver.disconnect()
+    }
   }, [])
 
   useEffect(() => {
+    if (active && near) setArmed(true)
+  }, [active, near])
+
+  useEffect(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video || !armed) return
     if (active && inView) video.play().catch(() => {})
     else video.pause()
-  }, [active, inView])
+  }, [active, inView, armed])
 
   return (
     <div className={`auto-video-wrap ${className ?? ''}`} style={{'--ratio': ratio} as React.CSSProperties}>
     <button className="auto-video" type="button" onClick={onOpen} aria-label={`Watch ${label} fullscreen`}>
       <video
         ref={videoRef}
-        src={src}
-        poster={poster}
+        src={armed ? src : undefined}
+        poster={imageUrl(poster, 1600)}
         muted
         loop
         playsInline
@@ -120,7 +133,7 @@ export function WideProjectList({section, active}: {section: WorkSectionContent;
               <AutoVideo src={project.videoUrl} poster={project.image} active={active} defaultRatio={16 / 9} label={project.title} className="wide-video" onOpen={() => router.push(href)} />
             ) : (
               <Link href={href} className="wide-cover" aria-label={`Open ${project.title} project`}>
-                <img src={project.image} alt={`${project.title} project still`} />
+                <img src={imageUrl(project.image, 1600)} srcSet={imageSrcSet(project.image, WIDE_WIDTHS)} sizes="(max-width: 700px) 100vw, 92vw" loading={index < 2 ? 'eager' : 'lazy'} decoding="async" alt={`${project.title} project still`} />
               </Link>
             )}
           </article>

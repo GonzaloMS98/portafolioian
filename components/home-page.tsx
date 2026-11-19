@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, X } from 'lucide-react'
 import {type SiteContent, type WorkSectionContent} from '@/lib/content'
 import {fetchSiteContentOrNull} from '@/lib/sanity/content'
+import {imageUrl} from '@/lib/image'
 import {collectSectionVideos, VerticalFeed, WideProjectList} from '@/components/section-videos'
 
 type LightboxMedia = { kind: 'image'; src: string; alt: string } | { kind: 'video'; src: string; poster: string; alt: string }
@@ -114,7 +115,7 @@ export default function HomePage({initialContent}: {initialContent: SiteContent}
         </section>
 
         <section className={`view-panel ${view === 'home' ? 'is-visible' : ''}`} aria-hidden={view !== 'home'}>
-          <div className="hero"><div className="hero-media"><video ref={heroVideoRef} className={heroPlaybackFailed ? 'playback-failed' : ''} src={view === 'home' ? heroVideoSrc ?? undefined : undefined} autoPlay muted loop playsInline preload="metadata" poster={content.hero.poster} aria-label={content.hero.ariaLabel} onError={() => setHeroPlaybackFailed(true)} /><div className="media-wash" /><div className="media-grain" /></div></div>
+          <div className="hero"><div className="hero-media"><video ref={heroVideoRef} className={heroPlaybackFailed ? 'playback-failed' : ''} src={view === 'home' ? heroVideoSrc ?? undefined : undefined} autoPlay muted loop playsInline preload="metadata" poster={imageUrl(content.hero.poster, 1920)} aria-label={content.hero.ariaLabel} onError={() => setHeroPlaybackFailed(true)} /><div className="media-wash" /><div className="media-grain" /></div></div>
         </section>
 
         {workViews.map((section) => {
@@ -149,7 +150,7 @@ export default function HomePage({initialContent}: {initialContent: SiteContent}
         {lightboxMedia && (
           <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={`${lightboxMedia.alt} fullscreen`} onClick={() => setLightboxMedia(null)}>
             <button className="lightbox-close" type="button" aria-label="Close fullscreen media" onClick={() => setLightboxMedia(null)}><X /></button>
-            {lightboxMedia.kind === 'image' ? <img src={lightboxMedia.src} alt={lightboxMedia.alt} onClick={(event) => event.stopPropagation()} /> : <video controls autoPlay playsInline poster={lightboxMedia.poster} onClick={(event) => event.stopPropagation()}><source src={lightboxMedia.src} type="video/mp4" /></video>}
+            {lightboxMedia.kind === 'image' ? <img src={imageUrl(lightboxMedia.src, 2400, 85)} alt={lightboxMedia.alt} onClick={(event) => event.stopPropagation()} /> : <video controls autoPlay playsInline poster={lightboxMedia.poster} onClick={(event) => event.stopPropagation()}><source src={lightboxMedia.src} type="video/mp4" /></video>}
           </div>
         )}
 

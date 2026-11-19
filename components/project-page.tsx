@@ -6,6 +6,7 @@ import {useParams} from 'next/navigation'
 import {ArrowLeft, ArrowRight, X} from 'lucide-react'
 import {slugMatches, slugPath, type SiteContent} from '@/lib/content'
 import {fetchSiteContentOrNull} from '@/lib/sanity/content'
+import {imageSrcSet, imageUrl, WIDE_WIDTHS} from '@/lib/image'
 import {collectSectionVideos, WideVideoList} from '@/components/section-videos'
 
 type LightboxMedia = {kind: 'image'; src: string; alt: string} | {kind: 'video'; src: string; poster: string; alt: string}
@@ -84,7 +85,7 @@ export default function ProjectPage({initialContent}: {initialContent: SiteConte
           />
         ) : (
           <button className="project-page-cover" type="button" onClick={() => setLightboxMedia({kind: 'image', src: project.image, alt: project.title})} aria-label={`View ${project.title} fullscreen`}>
-            <img src={project.image} alt={project.title} />
+            <img src={imageUrl(project.image, 1600)} srcSet={imageSrcSet(project.image, WIDE_WIDTHS)} sizes="100vw" decoding="async" alt={project.title} />
           </button>
         )}
 
@@ -100,7 +101,7 @@ export default function ProjectPage({initialContent}: {initialContent: SiteConte
             <div className="bts-grid">
               {project.btsImages.map((image, index) => (
                 <button type="button" onClick={() => setLightboxMedia({kind: 'image', src: image, alt: `${project.title} behind the scenes ${index + 1}`})} key={`${image}-${index}`}>
-                  <img src={image} alt={`${project.title} behind the scenes ${index + 1}`} />
+                  <img src={imageUrl(image, 1000)} srcSet={imageSrcSet(image, [480, 720, 1000, 1400, 1800])} sizes="(max-width: 700px) 100vw, 50vw" loading="lazy" decoding="async" alt={`${project.title} behind the scenes ${index + 1}`} />
                 </button>
               ))}
             </div>
@@ -119,7 +120,7 @@ export default function ProjectPage({initialContent}: {initialContent: SiteConte
       {lightboxMedia && (
         <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={`${lightboxMedia.alt} fullscreen`} onClick={() => setLightboxMedia(null)}>
           <button className="lightbox-close" type="button" aria-label="Close fullscreen media" onClick={() => setLightboxMedia(null)}><X /></button>
-          {lightboxMedia.kind === 'image' ? <img src={lightboxMedia.src} alt={lightboxMedia.alt} onClick={(event) => event.stopPropagation()} /> : <video controls autoPlay playsInline poster={lightboxMedia.poster || undefined} onClick={(event) => event.stopPropagation()}><source src={lightboxMedia.src} type="video/mp4" /></video>}
+          {lightboxMedia.kind === 'image' ? <img src={imageUrl(lightboxMedia.src, 2400, 85)} alt={lightboxMedia.alt} onClick={(event) => event.stopPropagation()} /> : <video controls autoPlay playsInline poster={imageUrl(lightboxMedia.poster || undefined, 1600)} onClick={(event) => event.stopPropagation()}><source src={lightboxMedia.src} type="video/mp4" /></video>}
         </div>
       )}
     </main>
