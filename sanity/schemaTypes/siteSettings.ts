@@ -26,6 +26,7 @@ export const siteSettings = defineType({
     defineField({name: 'contactEyebrow', title: 'Contact eyebrow', type: 'string', group: 'contact', initialValue: 'ABOUT / CONTACT'}),
     defineField({name: 'contactRole', title: 'Role', type: 'string', group: 'contact', initialValue: 'VIDEOGRAPHER · DOP'}),
     defineField({name: 'contactName', title: 'Contact name', type: 'string', group: 'contact'}),
+    defineField({name: 'contactBio', title: 'About / trayectoria', type: 'text', rows: 4, group: 'contact', description: 'Descripción breve que aparece en About debajo del nombre.'}),
     defineField({name: 'contactEmail', title: 'Email', type: 'string', group: 'contact', validation: (rule) => rule.email()}),
     defineField({name: 'instagramHandle', title: 'Instagram handle', type: 'string', group: 'contact'}),
     defineField({name: 'instagramUrl', title: 'Instagram URL', type: 'url', group: 'contact'}),

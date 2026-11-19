@@ -37,6 +37,7 @@ export type SiteContent = {
     eyebrow: string
     role: string
     name: string
+    bio: string
     email: string
     instagramHandle: string
     instagramUrl: string
@@ -108,6 +109,7 @@ export const fallbackContent: SiteContent = {
     eyebrow: 'ABOUT / CONTACT',
     role: 'VIDEOGRAPHER · DOP',
     name: 'Ian Montaño',
+    bio: 'Videógrafo y director de fotografía. Trabajo en videoclips, publicidad y proyectos de autor, cuidando la imagen desde la preproducción hasta el set.',
     email: 'iansanchez98@hotmail.com',
     instagramHandle: '@kan_kyo_o',
     instagramUrl: 'https://instagram.com/kan_kyo_o',
