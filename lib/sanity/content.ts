@@ -31,6 +31,7 @@ const siteContentQuery = `{
     "id": slug.current,
     label,
     intro,
+    verticalFeed,
     "projects": *[_type == "project" && references(^._id)] | order(order asc){
       "id": slug.current,
       title,
@@ -51,6 +52,7 @@ type SanityResult = {
     id?: string
     label?: string
     intro?: string
+    verticalFeed?: boolean
     projects?: Array<{
       id?: string
       title?: string
@@ -77,6 +79,7 @@ export async function fetchSiteContent(): Promise<SiteContent> {
         id: section.id!,
         label: section.label!,
         intro: section.intro || '',
+        verticalFeed: section.verticalFeed === true,
         projects: (section.projects || [])
           .filter((project) => project.id && project.title && project.image)
           .map((project) => ({

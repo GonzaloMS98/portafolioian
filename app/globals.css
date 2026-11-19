@@ -69,3 +69,39 @@
 @media (max-width: 420px) { .masonry-gallery { grid-template-columns: 1fr; } }
 @media (max-width: 700px) { .project-modal { padding: 0; } .project-story { width: 100%; height: 100svh; } .project-close { top: 10px; right: 10px; margin: 10px 10px -50px 0; } .project-copy { width: calc(100% - 36px); padding: 48px 0; } .project-copy h2 { margin-bottom: 28px; } .bts-section { padding: 0 10px 28px; } .bts-grid { grid-template-columns: 1fr; gap: 10px; } .bts-grid button:nth-child(3n + 1) { grid-row: auto; } .bts-grid img, .bts-grid video { min-height: 0; aspect-ratio: 4 / 3; } .media-lightbox { padding: 10px; } .lightbox-close { right: 12px; top: 12px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } .hero-media video { display: none; } }
+/* Section video layouts — shared */
+.auto-video-wrap { min-width: 0; }
+.auto-video { display: block; position: relative; width: 100%; aspect-ratio: var(--ratio, 16 / 9); padding: 0; border: 0; background: #0d0e0c; cursor: zoom-in; overflow: hidden; }
+.auto-video video { display: block; width: 100%; height: 100%; object-fit: contain; }
+/* Wide: one video after another, as wide as possible without exceeding the viewport height */
+.layout-wide { --wide-max-h: calc(100svh - 150px); }
+.wide-list { display: flex; flex-direction: column; align-items: center; gap: clamp(40px, 6vw, 88px); width: 100%; padding-bottom: 24px; }
+.wide-item { width: 100%; margin: 0; display: flex; flex-direction: column; align-items: center; }
+.wide-video { width: min(100%, calc(var(--wide-max-h) * var(--ratio, 16 / 9))); }
+.wide-item figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-top: 12px; }
+.wide-item figcaption button { padding: 0; border: 0; background: transparent; color: #151612; font-size: clamp(13px, 1.2vw, 17px); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
+.wide-item figcaption button:hover { text-decoration: underline; text-underline-offset: 4px; }
+.wide-item figcaption span { color: rgba(21,22,18,.5); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+/* Feed: adaptive vertical grid with floating project filter */
+.feed-wrap { position: relative; width: min(1080px, 100%); margin: 0 auto; }
+.feed-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; align-items: start; padding-bottom: 96px; }
+.feed-item { animation: feed-in .5s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+.feed-item .auto-video { aspect-ratio: 9 / 16; }
+.feed-item .auto-video video { transition: transform .5s ease, filter .35s ease; filter: saturate(.9); }
+.feed-item .auto-video:hover video { transform: scale(.985); filter: saturate(1); }
+@keyframes feed-in { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
+.feed-filter { position: sticky; bottom: clamp(14px, 3vh, 28px); z-index: 20; display: flex; justify-content: center; margin-top: -72px; pointer-events: none; }
+.feed-filter-track { display: flex; gap: 4px; max-width: 100%; padding: 5px; overflow-x: auto; scrollbar-width: none; border: 1px solid rgba(21,22,18,.1); border-radius: 999px; background: rgba(255,255,255,.82); box-shadow: 0 10px 30px rgba(0,0,0,.12); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); pointer-events: auto; animation: feed-in .5s .15s both; }
+.feed-filter-track button { flex: 0 0 auto; padding: 9px 15px; border: 0; border-radius: 999px; background: transparent; color: rgba(21,22,18,.6); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; cursor: pointer; transition: background .3s ease, color .3s ease, transform .2s ease; }
+.feed-filter-track button:hover { color: #151612; }
+.feed-filter-track button:active { transform: scale(.95); }
+.feed-filter-track button.is-active { background: #151612; color: #f5f1e9; }
+@media (max-width: 700px) {
+  .layout-wide { --wide-max-h: calc(100svh - 170px); }
+  .wide-list { gap: 36px; }
+  .feed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; }
+  .feed-filter { justify-content: flex-start; }
+  .feed-filter-track button { padding: 8px 12px; font-size: 9px; }
+}
+@media (max-width: 900px) { .feed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .feed-item, .feed-filter-track { animation: none; } }

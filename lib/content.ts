@@ -14,6 +14,8 @@ export type WorkSectionContent = {
   id: string
   label: string
   intro: string
+  /** true = feed vertical tipo Instagram con filtro por proyecto; false = wide (un video tras otro) */
+  verticalFeed: boolean
   projects: ProjectContent[]
 }
 
@@ -129,6 +131,7 @@ export const fallbackContent: SiteContent = {
       id: section.id,
       label: section.label,
       intro: section.intro,
+      verticalFeed: false,
       projects: section.projects.map(([id, title, type, year, image]) => ({
         id,
         title,

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, X } from 'lucide-react'
 import {fallbackContent, type ProjectContent, type WorkSectionContent} from '@/lib/content'
 import {fetchSiteContent} from '@/lib/sanity/content'
+import {collectSectionVideos, VerticalFeed, WideVideoList} from '@/components/section-videos'
 
 type LightboxMedia = { kind: 'image'; src: string; alt: string } | { kind: 'video'; src: string; poster: string; alt: string }
 
@@ -103,21 +104,36 @@ export default function Page() {
           const previousSection = workViews[(sectionIndex - 1 + workViews.length) % workViews.length]
           const nextSection = workViews[(sectionIndex + 1) % workViews.length]
           const sectionMenu = workViews.length > 2 ? [previousSection, section, nextSection] : workViews
+          const sectionVideos = collectSectionVideos(data)
+          const videosActive = view === section && !selectedProject && !lightboxMedia
+          const videoLayoutProps = {
+            section: data,
+            videos: sectionVideos,
+            active: videosActive,
+            onOpenVideo: (video: (typeof sectionVideos)[number]) => setLightboxMedia({kind: 'video', src: video.src, poster: video.poster ?? '', alt: video.project.title}),
+            onOpenProject: (project: ProjectContent) => setSelectedProject({project, section}),
+          }
           return (
-            <section key={section} className={`view-panel collection-panel ${view === section ? 'is-visible' : ''}`} aria-labelledby={`${section}-title`} aria-hidden={view !== section}>
+            <section key={section} className={`view-panel collection-panel ${sectionVideos.length ? (data.verticalFeed ? 'layout-feed' : 'layout-wide') : ''} ${view === section ? 'is-visible' : ''}`} aria-labelledby={`${section}-title`} aria-hidden={view !== section}>
               <nav className="section-switcher" aria-label="Video sections">
                 {sectionMenu.map((menuSection) => (
                   <button id={menuSection === section ? `${section}-title` : undefined} className={menuSection === section ? 'is-active' : ''} type="button" onClick={() => openSection(menuSection)} key={menuSection}>{workSections[menuSection].label}</button>
                 ))}
               </nav>
-              <div className="masonry-gallery">
-                {data.projects.map((project) => (
-                  <button className="masonry-card" type="button" onClick={() => setSelectedProject({ project, section })} key={project.title} aria-label={`Open ${project.title} project`}>
-                    <img src={project.image} alt={`${project.title} project still`} />
-                    <h3>{project.title}</h3>
-                  </button>
-                ))}
-              </div>
+              {sectionVideos.length === 0 ? (
+                <div className="masonry-gallery">
+                  {data.projects.map((project) => (
+                    <button className="masonry-card" type="button" onClick={() => setSelectedProject({ project, section })} key={project.title} aria-label={`Open ${project.title} project`}>
+                      <img src={project.image} alt={`${project.title} project still`} />
+                      <h3>{project.title}</h3>
+                    </button>
+                  ))}
+                </div>
+              ) : data.verticalFeed ? (
+                <VerticalFeed {...videoLayoutProps} />
+              ) : (
+                <WideVideoList {...videoLayoutProps} />
+              )}
             </section>
           )
         })}
