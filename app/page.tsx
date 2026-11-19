@@ -1,21 +1,22 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { ArrowUpRight, X } from 'lucide-react'
-import {fallbackContent, type ProjectContent, type WorkSectionContent} from '@/lib/content'
+import {fallbackContent, type WorkSectionContent} from '@/lib/content'
 import {fetchSiteContent} from '@/lib/sanity/content'
-import {collectSectionVideos, VerticalFeed, WideVideoList} from '@/components/section-videos'
+import {collectSectionVideos, VerticalFeed} from '@/components/section-videos'
 
 type LightboxMedia = { kind: 'image'; src: string; alt: string } | { kind: 'video'; src: string; poster: string; alt: string }
 
 export default function Page() {
   const [content, setContent] = useState(fallbackContent)
   const [view, setView] = useState('home')
-  const [selectedProject, setSelectedProject] = useState<{ project: ProjectContent; section: string } | null>(null)
   const [lightboxMedia, setLightboxMedia] = useState<LightboxMedia | null>(null)
   const [heroVideoSrc, setHeroVideoSrc] = useState<string | null>(null)
   const [heroPlaybackFailed, setHeroPlaybackFailed] = useState(false)
   const heroVideoRef = useRef<HTMLVideoElement>(null)
+  const initialHashRef = useRef<string | null>(null)
   const workViews = content.sections.map((section) => section.id)
   const workSections = Object.fromEntries(content.sections.map((section) => [section.id, section])) as Record<string, WorkSectionContent>
 
@@ -54,15 +55,33 @@ export default function Page() {
   }, [view, heroVideoSrc])
 
   useEffect(() => {
-    if (!selectedProject && !lightboxMedia) return
+    if (!lightboxMedia) return
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return
-      if (lightboxMedia) setLightboxMedia(null)
-      else setSelectedProject(null)
+      if (event.key === 'Escape') setLightboxMedia(null)
     }
     window.addEventListener('keydown', closeOnEscape)
     return () => window.removeEventListener('keydown', closeOnEscape)
-  }, [selectedProject, lightboxMedia])
+  }, [lightboxMedia])
+
+  // Deep links: /#<section-id> or /#contact opens that view (used by the project pages' nav).
+  useEffect(() => {
+    if (initialHashRef.current === null) initialHashRef.current = decodeURIComponent(window.location.hash.slice(1))
+    const target = initialHashRef.current
+    if (target === 'contact' || content.sections.some((section) => section.id === target)) setView(target)
+    const onHashChange = () => {
+      const next = decodeURIComponent(window.location.hash.slice(1))
+      if (next === 'contact' || content.sections.some((section) => section.id === next)) setView(next)
+      else if (!next) setView('home')
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [content])
+
+  useEffect(() => {
+    if (initialHashRef.current === null) return
+    const url = view === 'home' ? window.location.pathname : `#${view}`
+    window.history.replaceState(null, '', url)
+  }, [view])
 
   const openSection = (section: string) => {
     setView(section)
@@ -105,66 +124,34 @@ export default function Page() {
           const nextSection = workViews[(sectionIndex + 1) % workViews.length]
           const sectionMenu = workViews.length > 2 ? [previousSection, section, nextSection] : workViews
           const sectionVideos = collectSectionVideos(data)
-          const videosActive = view === section && !selectedProject && !lightboxMedia
-          const videoLayoutProps = {
-            section: data,
-            videos: sectionVideos,
-            active: videosActive,
-            onOpenVideo: (video: (typeof sectionVideos)[number]) => setLightboxMedia({kind: 'video', src: video.src, poster: video.poster ?? '', alt: video.project.title}),
-            onOpenProject: (project: ProjectContent) => setSelectedProject({project, section}),
-          }
+          const showFeed = data.verticalFeed && sectionVideos.length > 0
           return (
-            <section key={section} className={`view-panel collection-panel ${sectionVideos.length ? (data.verticalFeed ? 'layout-feed' : 'layout-wide') : ''} ${view === section ? 'is-visible' : ''}`} aria-labelledby={`${section}-title`} aria-hidden={view !== section}>
+            <section key={section} className={`view-panel collection-panel ${showFeed ? 'layout-feed' : ''} ${view === section ? 'is-visible' : ''}`} aria-labelledby={`${section}-title`} aria-hidden={view !== section}>
               <nav className="section-switcher" aria-label="Video sections">
                 {sectionMenu.map((menuSection) => (
                   <button id={menuSection === section ? `${section}-title` : undefined} className={menuSection === section ? 'is-active' : ''} type="button" onClick={() => openSection(menuSection)} key={menuSection}>{workSections[menuSection].label}</button>
                 ))}
               </nav>
-              {sectionVideos.length === 0 ? (
+              {showFeed ? (
+                <VerticalFeed
+                  section={data}
+                  videos={sectionVideos}
+                  active={view === section && !lightboxMedia}
+                  onOpenVideo={(video) => setLightboxMedia({kind: 'video', src: video.src, poster: video.poster ?? '', alt: video.project.title})}
+                />
+              ) : (
                 <div className="masonry-gallery">
                   {data.projects.map((project) => (
-                    <button className="masonry-card" type="button" onClick={() => setSelectedProject({ project, section })} key={project.title} aria-label={`Open ${project.title} project`}>
+                    <Link className="masonry-card" href={`/work/${section}/${project.id}`} key={project.id} aria-label={`Open ${project.title} project`}>
                       <img src={project.image} alt={`${project.title} project still`} />
                       <h3>{project.title}</h3>
-                    </button>
+                    </Link>
                   ))}
                 </div>
-              ) : data.verticalFeed ? (
-                <VerticalFeed {...videoLayoutProps} />
-              ) : (
-                <WideVideoList {...videoLayoutProps} />
               )}
             </section>
           )
         })}
-
-        {selectedProject && (
-          <div className="project-modal" role="dialog" aria-modal="true" aria-label={`${selectedProject.project.title} project`} onClick={() => setSelectedProject(null)}>
-            <article className="project-story" onClick={(event) => event.stopPropagation()}>
-              <button className="project-close" type="button" aria-label="Close project" onClick={() => setSelectedProject(null)}><X /></button>
-              {selectedProject.project.videoUrl ? <button className="project-film" type="button" onClick={() => setLightboxMedia({ kind: 'video', src: selectedProject.project.videoUrl, poster: selectedProject.project.image, alt: selectedProject.project.title })} aria-label={`Watch ${selectedProject.project.title} fullscreen`}><video muted loop playsInline autoPlay preload="metadata" poster={selectedProject.project.image}><source src={selectedProject.project.videoUrl} type="video/mp4" /></video><span>{content.footer.viewFilmLabel}</span></button> : <button className="project-film project-cover" type="button" onClick={() => setLightboxMedia({kind: 'image', src: selectedProject.project.image, alt: selectedProject.project.title})} aria-label={`View ${selectedProject.project.title} fullscreen`}><img src={selectedProject.project.image} alt={selectedProject.project.title} /><span>{content.footer.viewImageLabel}</span></button>}
-              <div className="project-copy">
-                <h2>{selectedProject.project.title}</h2>
-                {selectedProject.project.body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-              </div>
-              <section className="bts-section" aria-label="Behind the scenes">
-                <h3>{content.footer.btsLabel}</h3>
-                <div className="bts-grid">
-                  {(selectedProject.project.btsImages.length ? selectedProject.project.btsImages : [selectedProject.project.image]).map((image, index) => (
-                    <button type="button" onClick={() => setLightboxMedia({ kind: 'image', src: image, alt: `${selectedProject.project.title} behind the scenes ${index + 1}` })} key={`${image}-${index}`}>
-                      <img src={image} alt={`${selectedProject.project.title} behind the scenes ${index + 1}`} />
-                    </button>
-                  ))}
-                  {selectedProject.project.galleryVideos.map((video, index) => (
-                    <button type="button" onClick={() => setLightboxMedia({kind: 'video', src: video, poster: selectedProject.project.image, alt: `${selectedProject.project.title} video ${index + 1}`})} key={`${video}-${index}`}>
-                      <video src={video} muted playsInline preload="metadata" aria-label={`${selectedProject.project.title} video ${index + 1}`} />
-                    </button>
-                  ))}
-                </div>
-              </section>
-            </article>
-          </div>
-        )}
 
         {lightboxMedia && (
           <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={`${lightboxMedia.alt} fullscreen`} onClick={() => setLightboxMedia(null)}>

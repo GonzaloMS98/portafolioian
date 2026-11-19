@@ -79,35 +79,27 @@ function AutoVideo({src, poster, active, defaultRatio, label, className, onOpen,
 }
 
 type LayoutProps = {
-  section: WorkSectionContent
   videos: SectionVideo[]
   active: boolean
   onOpenVideo: (video: SectionVideo) => void
-  onOpenProject: (project: ProjectContent) => void
 }
 
 function videoLabel(video: SectionVideo) {
   return video.index === 0 ? video.project.title : `${video.project.title} ${video.index + 1}`
 }
 
-export function WideVideoList({videos, active, onOpenVideo, onOpenProject}: LayoutProps) {
+/** Project page: one video after another, as wide as possible without exceeding the viewport height. */
+export function WideVideoList({videos, active, onOpenVideo}: LayoutProps) {
   return (
     <div className="wide-list">
       {videos.map((video) => (
-        <figure className="wide-item" key={video.key}>
-          <AutoVideo src={video.src} poster={video.poster} active={active} defaultRatio={16 / 9} label={videoLabel(video)} className="wide-video" onOpen={() => onOpenVideo(video)}>
-            <figcaption>
-              <button type="button" onClick={() => onOpenProject(video.project)}>{videoLabel(video)}</button>
-              <span>{[video.project.type, video.project.year].filter(Boolean).join(' · ')}</span>
-            </figcaption>
-          </AutoVideo>
-        </figure>
+        <AutoVideo key={video.key} src={video.src} poster={video.poster} active={active} defaultRatio={16 / 9} label={videoLabel(video)} className="wide-video" onOpen={() => onOpenVideo(video)} />
       ))}
     </div>
   )
 }
 
-export function VerticalFeed({section, videos, active, onOpenVideo}: LayoutProps) {
+export function VerticalFeed({section, videos, active, onOpenVideo}: LayoutProps & {section: WorkSectionContent}) {
   const [filter, setFilter] = useState<string>('all')
   const gridRef = useRef<HTMLDivElement>(null)
   const projects = useMemo(() => section.projects.filter((project) => videos.some((video) => video.project.id === project.id)), [section.projects, videos])
