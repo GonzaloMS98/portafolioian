@@ -1,6 +1,9 @@
 'use client'
 
 import {useEffect, useMemo, useRef, useState} from 'react'
+import Link from 'next/link'
+import {useRouter} from 'next/navigation'
+import {ArrowUpRight} from 'lucide-react'
 import type {ProjectContent, WorkSectionContent} from '@/lib/content'
 
 export type SectionVideo = {
@@ -95,6 +98,40 @@ export function WideVideoList({videos, active, onOpenVideo}: LayoutProps) {
       {videos.map((video) => (
         <AutoVideo key={video.key} src={video.src} poster={video.poster} active={active} defaultRatio={16 / 9} label={videoLabel(video)} className="wide-video" onOpen={() => onOpenVideo(video)} />
       ))}
+    </div>
+  )
+}
+
+/** Section wide layout: grouped by project — header per project, then its videos one by one at full width. Clicking opens the project page. */
+export function WideProjectList({section, active}: {section: WorkSectionContent; active: boolean}) {
+  const router = useRouter()
+  return (
+    <div className="wide-projects">
+      {section.projects.map((project) => {
+        const href = `/work/${section.id}/${project.id}`
+        const videos = collectSectionVideos({...section, projects: [project]})
+        const meta = [project.type, project.year].filter(Boolean).join(' · ')
+        return (
+          <article className="wide-project" key={project.id}>
+            <header className="wide-project-header">
+              <Link href={href} className="wide-project-title"><h3>{project.title}</h3></Link>
+              {meta && <span className="wide-project-meta">{meta}</span>}
+              <Link href={href} className="wide-project-link">View project <ArrowUpRight /></Link>
+            </header>
+            {videos.length ? (
+              <div className="wide-list">
+                {videos.map((video) => (
+                  <AutoVideo key={video.key} src={video.src} poster={video.poster} active={active} defaultRatio={16 / 9} label={videoLabel(video)} className="wide-video" onOpen={() => router.push(href)} />
+                ))}
+              </div>
+            ) : (
+              <Link href={href} className="wide-cover" aria-label={`Open ${project.title} project`}>
+                <img src={project.image} alt={`${project.title} project still`} />
+              </Link>
+            )}
+          </article>
+        )
+      })}
     </div>
   )
 }

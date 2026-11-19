@@ -1,11 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { ArrowUpRight, X } from 'lucide-react'
 import {fallbackContent, type WorkSectionContent} from '@/lib/content'
 import {fetchSiteContent} from '@/lib/sanity/content'
-import {collectSectionVideos, VerticalFeed} from '@/components/section-videos'
+import {collectSectionVideos, VerticalFeed, WideProjectList} from '@/components/section-videos'
 
 type LightboxMedia = { kind: 'image'; src: string; alt: string } | { kind: 'video'; src: string; poster: string; alt: string }
 
@@ -126,7 +125,7 @@ export default function Page() {
           const sectionVideos = collectSectionVideos(data)
           const showFeed = data.verticalFeed && sectionVideos.length > 0
           return (
-            <section key={section} className={`view-panel collection-panel ${showFeed ? 'layout-feed' : ''} ${view === section ? 'is-visible' : ''}`} aria-labelledby={`${section}-title`} aria-hidden={view !== section}>
+            <section key={section} className={`view-panel collection-panel ${showFeed ? 'layout-feed' : 'layout-wide'} ${view === section ? 'is-visible' : ''}`} aria-labelledby={`${section}-title`} aria-hidden={view !== section}>
               <nav className="section-switcher" aria-label="Video sections">
                 {sectionMenu.map((menuSection) => (
                   <button id={menuSection === section ? `${section}-title` : undefined} className={menuSection === section ? 'is-active' : ''} type="button" onClick={() => openSection(menuSection)} key={menuSection}>{workSections[menuSection].label}</button>
@@ -140,14 +139,7 @@ export default function Page() {
                   onOpenVideo={(video) => setLightboxMedia({kind: 'video', src: video.src, poster: video.poster ?? '', alt: video.project.title})}
                 />
               ) : (
-                <div className="masonry-gallery">
-                  {data.projects.map((project) => (
-                    <Link className="masonry-card" href={`/work/${section}/${project.id}`} key={project.id} aria-label={`Open ${project.title} project`}>
-                      <img src={project.image} alt={`${project.title} project still`} />
-                      <h3>{project.title}</h3>
-                    </Link>
-                  ))}
-                </div>
+                <WideProjectList section={data} active={view === section && !lightboxMedia} />
               )}
             </section>
           )
