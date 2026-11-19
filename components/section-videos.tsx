@@ -3,7 +3,6 @@
 import {useEffect, useMemo, useRef, useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/navigation'
-import {ArrowUpRight} from 'lucide-react'
 import type {ProjectContent, WorkSectionContent} from '@/lib/content'
 
 export type SectionVideo = {
@@ -102,32 +101,33 @@ export function WideVideoList({videos, active, onOpenVideo}: LayoutProps) {
   )
 }
 
-/** Section wide layout: grouped by project — header per project, then its videos one by one at full width. Clicking opens the project page. */
+/** Section wide layout: one full-width card per project (main video, or cover when there is none). Clicking opens the project page. */
 export function WideProjectList({section, active}: {section: WorkSectionContent; active: boolean}) {
   const router = useRouter()
   return (
     <div className="wide-projects">
       {section.projects.map((project) => {
         const href = `/work/${section.id}/${project.id}`
-        const videos = collectSectionVideos({...section, projects: [project]})
         const meta = [project.type, project.year].filter(Boolean).join(' · ')
+        const caption = (
+          <Link href={href} className="wide-project-caption">
+            <h3>{project.title}</h3>
+            {meta && <span>{meta}</span>}
+          </Link>
+        )
         return (
           <article className="wide-project" key={project.id}>
-            <header className="wide-project-header">
-              <Link href={href} className="wide-project-title"><h3>{project.title}</h3></Link>
-              {meta && <span className="wide-project-meta">{meta}</span>}
-              <Link href={href} className="wide-project-link">View project <ArrowUpRight /></Link>
-            </header>
-            {videos.length ? (
-              <div className="wide-list">
-                {videos.map((video) => (
-                  <AutoVideo key={video.key} src={video.src} poster={video.poster} active={active} defaultRatio={16 / 9} label={videoLabel(video)} className="wide-video" onOpen={() => router.push(href)} />
-                ))}
-              </div>
+            {project.videoUrl ? (
+              <AutoVideo src={project.videoUrl} poster={project.image} active={active} defaultRatio={16 / 9} label={project.title} className="wide-video" onOpen={() => router.push(href)}>
+                {caption}
+              </AutoVideo>
             ) : (
-              <Link href={href} className="wide-cover" aria-label={`Open ${project.title} project`}>
-                <img src={project.image} alt={`${project.title} project still`} />
-              </Link>
+              <div className="wide-cover">
+                <Link href={href} aria-label={`Open ${project.title} project`}>
+                  <img src={project.image} alt={`${project.title} project still`} />
+                </Link>
+                {caption}
+              </div>
             )}
           </article>
         )
