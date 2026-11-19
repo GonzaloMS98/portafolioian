@@ -3,7 +3,7 @@
 import {useEffect, useMemo, useRef, useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/navigation'
-import type {ProjectContent, WorkSectionContent} from '@/lib/content'
+import {slugPath, type ProjectContent, type WorkSectionContent} from '@/lib/content'
 
 export type SectionVideo = {
   key: string
@@ -107,7 +107,7 @@ export function WideProjectList({section, active}: {section: WorkSectionContent;
   return (
     <div className="wide-projects">
       {section.projects.map((project, index) => {
-        const href = `/work/${section.id}/${project.id}`
+        const href = `/work/${slugPath(section.id)}/${slugPath(project.id)}`
         const meta = [project.type, project.year].filter(Boolean).join(' · ')
         return (
           <article className="wide-project" key={project.id}>

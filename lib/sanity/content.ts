@@ -67,8 +67,9 @@ type SanityResult = {
   }>
 }
 
-export async function fetchSiteContent(): Promise<SiteContent> {
-  if (!sanityClient) return fallbackContent
+/** Live content from Sanity, or null when Sanity is unreachable (callers keep whatever they already show). */
+export async function fetchSiteContentOrNull(): Promise<SiteContent | null> {
+  if (!sanityClient) return null
 
   try {
     const result = await sanityClient.fetch<SanityResult>(siteContentQuery)
@@ -132,7 +133,12 @@ export async function fetchSiteContent(): Promise<SiteContent> {
       sections: sections.length ? sections : fallbackContent.sections,
     }
   } catch (error) {
-    console.error('Sanity content fetch failed; using local fallback.', error)
-    return fallbackContent
+    console.error('Sanity content fetch failed.', error)
+    return null
   }
+}
+
+/** Live content from Sanity, falling back to the bundled demo content. */
+export async function fetchSiteContent(): Promise<SiteContent> {
+  return (await fetchSiteContentOrNull()) ?? fallbackContent
 }

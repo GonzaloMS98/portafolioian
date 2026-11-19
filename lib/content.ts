@@ -126,7 +126,6 @@ export const fallbackContent: SiteContent = {
     viewImageLabel: 'View image',
   },
   sections: sectionSeed.map((section) => {
-    const images = section.projects.map((project) => project[4])
     return {
       id: section.id,
       label: section.label,
@@ -143,9 +142,21 @@ export const fallbackContent: SiteContent = {
           `${title} is a visual story developed through observation, movement, and natural light. The film focuses on honest moments and a restrained cinematic language, allowing each frame to feel immediate and lived-in.`,
           'From early references through the final edit, the project was shaped as one continuous atmosphere. These images document the process behind the film—from location and lighting tests to the details found between takes.',
         ],
-        btsImages: [...images],
+        btsImages: [image],
         galleryVideos: [],
       })),
     }
   }),
+}
+
+/** Project/section slugs can contain spaces or accents; URLs carry them encoded. */
+export function slugPath(slug: string) {
+  return encodeURIComponent(slug.trim())
+}
+
+export function slugMatches(param: string | undefined, slug: string) {
+  if (!param) return false
+  let decoded = param
+  try { decoded = decodeURIComponent(param) } catch {}
+  return decoded.trim() === slug.trim()
 }
