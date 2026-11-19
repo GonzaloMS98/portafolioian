@@ -106,28 +106,22 @@ export function WideProjectList({section, active}: {section: WorkSectionContent;
   const router = useRouter()
   return (
     <div className="wide-projects">
-      {section.projects.map((project) => {
+      {section.projects.map((project, index) => {
         const href = `/work/${section.id}/${project.id}`
         const meta = [project.type, project.year].filter(Boolean).join(' · ')
-        const caption = (
-          <Link href={href} className="wide-project-caption">
-            <h3>{project.title}</h3>
-            {meta && <span>{meta}</span>}
-          </Link>
-        )
         return (
           <article className="wide-project" key={project.id}>
+            <Link href={href} className="wide-project-header">
+              <span className="wide-project-index">{String(index + 1).padStart(2, '0')}</span>
+              <h3>{project.title}</h3>
+              {meta && <span className="wide-project-meta">{meta}</span>}
+            </Link>
             {project.videoUrl ? (
-              <AutoVideo src={project.videoUrl} poster={project.image} active={active} defaultRatio={16 / 9} label={project.title} className="wide-video" onOpen={() => router.push(href)}>
-                {caption}
-              </AutoVideo>
+              <AutoVideo src={project.videoUrl} poster={project.image} active={active} defaultRatio={16 / 9} label={project.title} className="wide-video" onOpen={() => router.push(href)} />
             ) : (
-              <div className="wide-cover">
-                <Link href={href} aria-label={`Open ${project.title} project`}>
-                  <img src={project.image} alt={`${project.title} project still`} />
-                </Link>
-                {caption}
-              </div>
+              <Link href={href} className="wide-cover" aria-label={`Open ${project.title} project`}>
+                <img src={project.image} alt={`${project.title} project still`} />
+              </Link>
             )}
           </article>
         )
